@@ -1,0 +1,17 @@
+{
+  "short_name": "josy-log-server-client",
+  "name": "josy-log-server-client",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "16x16"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#8a2be2",
+  "background_color": "#333333",
+  "orientation": "any",
+  "categories": ["utilities"]
+}

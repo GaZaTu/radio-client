@@ -1,0 +1,8 @@
+[default]
+description = "Default permissions for pwhash"
+permissions = [
+  "allow-pwhash-create-md5-hash",
+  "allow-pwhash-create-md5-password-hash",
+  "allow-pwhash-create-sha256-password-hash",
+  "allow-pwhash-create-sha512-password-hash",
+]

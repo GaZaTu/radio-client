@@ -1,0 +1,81 @@
+{
+  "identifier": "xyz.gazatu.radioclient",
+  "productName": "radioclient",
+  "version": "0.1.0",
+  "app": {
+    "macOSPrivateApi": false,
+    "security": {
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "/**/*.png",
+          "/**/*.jpg",
+          "/**/*.webp",
+          "/**/*.avif",
+          "/**/*.jxl"
+        ]
+      },
+      "capabilities": [],
+      "dangerousDisableAssetCspModification": false,
+      "freezePrototype": false,
+      "pattern": {
+        "use": "brownfield"
+      },
+      "csp": null
+    },
+    "windows": [
+      {
+        "label": "main",
+        "fullscreen": false,
+        "height": 720,
+        "resizable": true,
+        "title": "glinet-quick",
+        "width": 380
+      }
+    ],
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "android": {
+      "minSdkVersion": 29
+    },
+    "iOS": {},
+    "icon": [],
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": false,
+        "files": {}
+      },
+      "deb": {
+        "files": {}
+      },
+      "rpm": {
+        "epoch": 0,
+        "files": {},
+        "release": "1"
+      }
+    },
+    "targets": "all",
+    "windows": {
+      "allowDowngrades": true,
+      "certificateThumbprint": null,
+      "digestAlgorithm": null,
+      "nsis": null,
+      "timestampUrl": null,
+      "tsp": false,
+      "webviewFixedRuntimePath": null,
+      "webviewInstallMode": {
+        "silent": true,
+        "type": "downloadBootstrapper"
+      },
+      "wix": null
+    }
+  },
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run start",
+    "devUrl": "http://127.0.0.1:5173",
+    "frontendDist": "../dist"
+  }
+}

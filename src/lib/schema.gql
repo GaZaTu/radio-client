@@ -1,0 +1,361 @@
+type Query {
+  """requires role: log/admin"""
+  logEntryById(id: String!): LogEntry
+
+  """requires role: log/admin"""
+  logEntryListConnection(args: LogEntryListConnectionArgs): LogEntryListConnection
+
+  """requires role: log/admin"""
+  logEntryStats: LogEntryStats!
+
+  """requires role: log/admin"""
+  logEventsOTP: String!
+
+  """requires role: log/admin"""
+  logErrorById(id: String!): LogError
+
+  """requires role: log/admin"""
+  logErrorFrameById(id: String!): LogErrorFrame
+
+  """requires role: log/admin"""
+  logFilterById(id: String!): LogFilter
+
+  """requires role: log/admin"""
+  logFilterList(args: LogFilterListArgs): [LogFilter!]!
+
+  """requires role: log/admin"""
+  logZipRequestById(id: String!): LogZipRequest
+
+  """requires role: log/admin"""
+  logZipRequestList(args: LogZipRequestListArgs): [LogZipRequest!]!
+
+  """requires role: admin"""
+  auditLogEntryListConnection(args: AuditLogEntryListConnectionArgs): AuditLogEntryListConnection
+
+  """requires role: admin"""
+  serverLoad: [ServerLoadResultObject!]!
+
+  """requires role: sql/reader"""
+  sqlQuery(sql: String!): SQLQueryResult!
+  emailsAreSupported: Boolean!
+
+  """requires role: admin (or currentUser)"""
+  userById(id: String!): User
+
+  """requires role: admin"""
+  userList: [User!]!
+  userRoleList: [UserRole!]!
+  userAuthenticate(username: String!, password: String!): Auth!
+
+  """requires role: usage/admin"""
+  usageCountById(id: String!): UsageCount
+
+  """requires role: usage/admin"""
+  usageCountListConnection(args: UsageCountListConnectionArgs): UsageCountListConnection
+
+  """requires role: usage/admin"""
+  usageLocationById(id: String!): UsageLocation
+
+  """requires role: usage/admin"""
+  usageLocationList(args: UsageLocationListConnectionArgs): [UsageLocation!]!
+}
+
+type Mutation {
+  """requires role: log/admin"""
+  logFilterSave(input: LogFilterInput!): LogFilter!
+
+  """requires role: log/admin"""
+  logFilterListRemoveByIds(ids: [String!]!): Void
+
+  """requires role: log/admin"""
+  logZipRequestSave(input: LogZipRequestInput!): LogZipRequest!
+
+  """requires role: log/admin"""
+  logZipRequestListRemoveByIds(ids: [String!]!): Void
+  userCreate(username: String!, password: String): Auth
+
+  """requires role: admin (or currentUser)"""
+  userUpdate(input: UserInput!): Void
+
+  """requires role: admin (or currentUser)"""
+  userUpdatePassword(userId: String!, password: String!): Void
+  userRequestPasswordReset(username: String!): Void
+
+  """requires role: admin (or currentUser)"""
+  userResetPassword(passwordResetRequestId: String!, password: String!): Auth
+
+  """requires role: admin (or currentUser)"""
+  userListRemoveByIds(ids: [String!]!): Void
+
+  """requires role: usage/admin"""
+  usageLocationSave(input: UsageLocationInput!): UsageLocation!
+
+  """requires role: usage/admin"""
+  usageLocationListRemoveByIds(ids: [String!]!): Void
+}
+
+type LogEntry {
+  id: String
+  date: String!
+  level: String
+  class: String
+  method: String
+  message: String!
+  version: String
+  ip: String!
+  host: String
+  user: String
+  email: String
+  telephone: String
+  hasLogsZip: Boolean
+  filtered: Boolean
+  createdAt: String
+  grouped: Int
+
+  """requires role: log/admin"""
+  cause: LogError
+
+  """requires role: log/admin"""
+  errors: [LogError!]!
+}
+
+type LogEntryListConnection {
+  slice: [LogEntry!]!
+  pageIndex: Int!
+  pageCount: Int!
+}
+
+input LogEntryListConnectionArgs {
+  offset: Int = 0
+  limit: Int = 25
+  orderBy: OrderBy
+  search: String
+  filtered: Boolean
+  grouped: Boolean
+}
+
+input OrderBy {
+  col: String!
+  dir: SortDirection
+}
+
+enum SortDirection {
+  ASC
+  DESC
+}
+
+type LogEntryStats {
+  count: Int!
+  countFiltered: Int!
+  countNotFiltered: Int!
+  countWithLogsZip: Int!
+  dailyReports: [LogEntryDateStats!]!
+}
+
+type LogEntryDateStats {
+  date: String!
+  count: Int!
+  countFiltered: Int!
+  countNotFiltered: Int!
+  countWithLogsZip: Int!
+}
+
+type LogError {
+  id: String
+  entry: LogEntry!
+  index: Int!
+  class: String!
+  message: String!
+
+  """requires role: log/admin"""
+  cause: LogError
+
+  """requires role: log/admin"""
+  frames: [LogErrorFrame!]!
+}
+
+type LogErrorFrame {
+  id: String
+  error: LogError!
+  index: Int!
+  className: String
+  methodName: String
+  file: String
+  line: Int
+  isNative: Boolean
+}
+
+type LogFilter {
+  id: String
+  description: String!
+  jsonPath: String!
+  regexPattern: String!
+  andFilterId: String
+  disabled: Boolean
+  createdAt: String
+  noStore: Boolean
+  entries: [LogEntry!]!
+
+  """requires role: log/admin"""
+  andFilter: LogFilter
+
+  """requires role: log/admin"""
+  parentFilter: LogFilter
+}
+
+input LogFilterListArgs {
+  dummy: Void
+}
+
+scalar Void
+
+type LogZipRequest {
+  id: String
+  description: String!
+  jsonPath: String!
+  regexPattern: String!
+  pendingRequests: Int
+  disabled: Boolean
+  createdAt: String
+  entries: [LogEntry!]!
+}
+
+input LogZipRequestListArgs {
+  dummy: Void
+}
+
+input LogFilterInput {
+  id: String
+  description: String!
+  jsonPath: String!
+  regexPattern: String!
+  andFilterId: String
+  disabled: Boolean
+  noStore: Boolean
+}
+
+input LogZipRequestInput {
+  id: String
+  description: String!
+  jsonPath: String!
+  regexPattern: String!
+  pendingRequests: Int
+  disabled: Boolean
+}
+
+type AuditLogEntryListConnection {
+  slice: [AuditLogEntry!]!
+  pageIndex: Int!
+  pageCount: Int!
+}
+
+type AuditLogEntry {
+  id: String!
+  srcTable: String!
+  srcRowid: Unknown
+  updateKind: String!
+  timestamp: String!
+  previousValues: String!
+}
+
+scalar Unknown
+
+input AuditLogEntryListConnectionArgs {
+  offset: Int = 0
+  limit: Int = 25
+  srcTable: String!
+  srcRowid: Unknown
+}
+
+type ServerLoadResultObject {
+  timestamp: String!
+  requestsPerMinute: Float!
+  averageResponseTimeInMs: Float!
+  averageSystemLoad: Float!
+}
+
+type SQLQueryResult {
+  error: String
+  dataAsJson: String
+}
+
+type User {
+  id: String
+  username: String!
+  email: String!
+  roles: [UserRole!]!
+  activated: Boolean
+  createdAt: String
+  updatedAt: String
+}
+
+type UserRole {
+  id: String
+  name: String!
+  description: String
+}
+
+type Auth {
+  token: String!
+  user: User!
+}
+
+input UserInput {
+  id: String
+  username: String!
+  email: String!
+  roles: [UserRoleInput!]!
+  activated: Boolean
+  createdAt: String
+  updatedAt: String
+}
+
+input UserRoleInput {
+  id: String
+  name: String!
+  description: String
+}
+
+type UsageCount {
+  id: String
+  key: String!
+  year: Int!
+  month: Int!
+  location: String
+  usages: Int!
+  locationName: String
+}
+
+type UsageCountListConnection {
+  slice: [UsageCount!]!
+  pageIndex: Int!
+  pageCount: Int!
+}
+
+input UsageCountListConnectionArgs {
+  offset: Int = 0
+  limit: Int = 25
+  orderBy: OrderBy
+  search: String
+  previousYear: Boolean
+  combineMonths: Boolean
+  combineLocations: Boolean
+}
+
+type UsageLocation {
+  id: String
+  key: String!
+  name: String!
+  createdAt: String
+}
+
+input UsageLocationListConnectionArgs {
+  dummy: Void
+}
+
+input UsageLocationInput {
+  id: String
+  key: String!
+  name: String!
+  createdAt: String
+}
