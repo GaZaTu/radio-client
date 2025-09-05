@@ -1,0 +1,41 @@
+.Home {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  .tabs-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    >div {
+      height: 100%;
+
+      >div {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+    }
+  }
+
+  .chat-message {
+    text-wrap: auto;
+
+    &[data-has-badge][data-badge]::after {
+      background: var(--body-bg-monochrome);
+    }
+  }
+
+  ul[role=tablist] {
+    margin: 0;
+  }
+
+  div[role=tabpanel] {
+    max-height: calc(100vh - 42px);
+  }
+}
+
+.tabs .tabs-item a:focus {
+  color: inherit;
+}

@@ -31,10 +31,9 @@ const App: Component<Props> = props => {
   return (
     <Router url={props.url}>
       <MetaProvider>
-        <Title>JOSy Log Server</Title>
-        {/* <Meta name="description">logging</Meta> */}
+        <Title>radio-client</Title>
 
-        <AppHeader />
+        {/* <AppHeader /> */}
 
         <ErrorBoundary fallback={Toaster.pushError}>
           <AppMain />

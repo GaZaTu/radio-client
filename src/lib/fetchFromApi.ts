@@ -42,27 +42,3 @@ const fetchFromApi: (typeof fetch) = async (info, init) => {
 }
 
 export default fetchFromApi
-
-const fetchJson = async (...[info, init]: Parameters<typeof fetch>) => {
-  const response = await fetchFromApi(info, init)
-  if (response.status === 204) {
-    return undefined
-  }
-
-  const json = await response.json() as any | undefined
-
-  const errorMessage = json?.errors?.[0]?.message
-  if (errorMessage) {
-    throw new Error(errorMessage)
-  }
-
-  if (!response.ok) {
-    throw new Error(response.statusText)
-  }
-
-  return json
-}
-
-export {
-  fetchJson,
-}

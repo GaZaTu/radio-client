@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="120mm"
+   height="120mm"
+   viewBox="0 0 120 120"
+   version="1.1"
+   id="svg1"
+   inkscape:export-filename="bitmap.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   sodipodi:docname="drawing.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     inkscape:zoom="2.072124"
+     inkscape:cx="195.69292"
+     inkscape:cy="201.00148"
+     inkscape:window-width="2560"
+     inkscape:window-height="1372"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="120"
+       height="120"
+       id="page2"
+       margin="0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="layer_ring"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path1"
+       style="baseline-shift:baseline;display:inline;overflow:visible;opacity:1;vector-effect:none;stroke-width:1.0032;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+       d="M 51.999927,10 C 28.199564,13.857747 9.9999064,34.644009 9.9999064,59.67911 9.9999064,87.454435 32.401723,110 59.999955,110 87.598187,110 110,87.454435 110,59.67911 110,34.644009 91.800347,13.857747 67.999984,10 v 2.755905 c 22.322437,3.821139 39.296826,23.362382 39.296826,46.923205 0,26.305304 -21.159271,47.60035 -47.296855,47.60035 -26.137584,0 -47.296854,-21.295046 -47.296854,-47.60035 0,-23.560823 16.974389,-43.102066 39.296826,-46.923205 z"
+       inkscape:label="ring" />
+    <path
+       style="font-weight:bold;font-size:128px;-inkscape-font-specification:'sans-serif Bold';text-align:center;text-anchor:middle;white-space:pre;stroke:#000000;stroke-width:0"
+       d="m 442.03253,223.60074 h -24.576 l -39.808,-69.12 h -0.512 q 0.256,6.528 0.512,13.056 0.384,6.528 0.64,13.056 v 43.008 h -17.28 v -91.392 h 24.448 l 39.68,68.48 h 0.384 q -0.128,-6.4 -0.384,-12.672 -0.256,-6.272 -0.512,-12.544 v -43.264 h 17.408 z"
+       id="text1"
+       inkscape:label="north"
+       transform="matrix(0.12342033,0,0,0.10941866,10.444206,-8.4660936)"
+       aria-label="N" />
+  </g>
+</svg>

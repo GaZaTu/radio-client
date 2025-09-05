@@ -29,7 +29,7 @@
         "fullscreen": false,
         "height": 720,
         "resizable": true,
-        "title": "glinet-quick",
+        "title": "radio-client",
         "width": 380
       }
     ],
@@ -64,7 +64,6 @@
       "nsis": null,
       "timestampUrl": null,
       "tsp": false,
-      "webviewFixedRuntimePath": null,
       "webviewInstallMode": {
         "silent": true,
         "type": "downloadBootstrapper"
