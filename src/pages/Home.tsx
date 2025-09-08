@@ -20,13 +20,14 @@ import { badge } from "@gazatu/solid-spectre/util/badge"
 import { makePersisted } from "@solid-primitives/storage"
 import { invoke } from "@tauri-apps/api/core"
 import { listen } from "@tauri-apps/api/event"
+import { writeTextFile } from "@tauri-apps/plugin-fs"
 import * as notifications from "@tauri-apps/plugin-notification"
 import { Component, createMemo, createSignal, For, Show } from "solid-js"
-import createAsyncEffect from "../lib/createAsyncEffect"
-import saveFile from "../lib/saveFile"
-import compass_ring_svg from "../assets/compass_ring.svg"
 import compass_arrow_svg from "../assets/compass_arrow.svg"
 import compass_marker_svg from "../assets/compass_marker.svg"
+import compass_ring_svg from "../assets/compass_ring.svg"
+import createAsyncEffect from "../lib/createAsyncEffect"
+import saveFile from "../lib/saveFile"
 
 const LoRaBandwidthOptions = [
   7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125,
@@ -239,13 +240,22 @@ const getCurrentCoordinates = async () => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,
         maximumAge: 10000,
-        timeout: 10000,
+        timeout: 5000,
       })
     })
     return position.coords
   } catch (error) {
     return undefined
   }
+}
+
+export const getDownloadDir = async () => {
+  return "/sdcard/Download"
+  // if (await isAndroid()) {
+  //   return "/sdcard/Download"
+  // } else {
+  //   return await downloadDir()
+  // }
 }
 
 const timeFormat = new Intl.DateTimeFormat(undefined, {
@@ -285,10 +295,7 @@ const HomeView: Component = () => {
   const [getLocation, setLocation] = createSignal<GeolocationCoordinatesMin>()
   let updateLocationPromise = Promise.resolve()
   const updateLocation = async () => {
-    const start = Date.now()
     setLocation(await getCurrentCoordinates())
-    const end = Date.now()
-    Toaster.pushInfo(`geoloc time: ${(end - start)}ms`)
   }
 
   const getDistance = createMemo(() => {
@@ -379,10 +386,10 @@ const HomeView: Component = () => {
           break
         case "signal":
           log("recv signal")
+          setReady(true)
           setSignalStrength(ev)
           await updateLocationPromise
           setStoredData(d => [...d, { ...ev, ...getConfig(), distance: getDistance() }])
-          setReady(true)
           break
         case "preamble":
           log("recv preamble")
@@ -444,10 +451,10 @@ const HomeView: Component = () => {
     setLogMessage(`home: ${getHome()?.latitude}, ${getHome()?.longitude}`)
   }
 
-  const exportStoredData = () => {
-    const fileName = "radio-export.json"
-    saveFile(new Blob([JSON.stringify(getStoredData())]), fileName)
-    Toaster.pushSuccess(`exported ~/downloads/${fileName}`)
+  const exportStoredData = async () => {
+    const filePath = `${await getDownloadDir()}/radio-export.json`
+    writeTextFile(filePath, JSON.stringify(getStoredData()))
+    Toaster.pushSuccess(`exported ${filePath}`)
     setStoredData([])
   }
 
