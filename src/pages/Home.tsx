@@ -283,8 +283,12 @@ const HomeView: Component = () => {
   })
 
   const [getLocation, setLocation] = createSignal<GeolocationCoordinatesMin>()
+  let updateLocationPromise = Promise.resolve()
   const updateLocation = async () => {
+    const start = Date.now()
     setLocation(await getCurrentCoordinates())
+    const end = Date.now()
+    Toaster.pushInfo(`geoloc time: ${(end - start)}ms`)
   }
 
   const getDistance = createMemo(() => {
@@ -376,6 +380,7 @@ const HomeView: Component = () => {
         case "signal":
           log("recv signal")
           setSignalStrength(ev)
+          await updateLocationPromise
           setStoredData(d => [...d, { ...ev, ...getConfig(), distance: getDistance() }])
           setReady(true)
           break
@@ -419,7 +424,7 @@ const HomeView: Component = () => {
     setReady(false)
     log("sending...")
     try {
-      await updateLocation()
+      updateLocationPromise = updateLocation()
       await LoRa.connect(getDeviceName())
       await LoRa.send({ type: "signal" })
     } catch (error) {
