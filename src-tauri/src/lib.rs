@@ -202,6 +202,7 @@ async fn lora_listen_to_connection_updates(app_handle: tauri::AppHandle) -> Resu
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+    .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_notification::init())
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_shell::init())

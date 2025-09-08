@@ -19,6 +19,7 @@
     "geolocation:allow-check-permissions",
     "geolocation:allow-get-current-position",
     "geolocation:allow-request-permissions",
-    "notification:default"
+    "notification:default",
+    "fs:default"
   ]
 }
