@@ -1,21 +1,24 @@
 use std::{
-  sync::{LazyLock, Mutex},
-  time::Duration,
+  cell::RefCell, fs::OpenOptions, io::Write, rc::Rc, sync::{LazyLock, Mutex}, time::Duration
 };
 
+use codec2_sys::{codec2_bytes_per_frame, codec2_create, codec2_decode, codec2_destroy, codec2_encode, codec2_samples_per_frame, CODEC2, CODEC2_MODE_1200, CODEC2_MODE_3200};
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use tauri::{async_runtime, Emitter, Manager};
 use tauri_plugin_blec::{
   models::{BleDevice, ScanFilter, WriteType},
   OnDisconnectHandler,
 };
-use tokio::time::timeout;
+use tokio::{sync::mpsc, time::timeout};
 use uuid::{uuid, Uuid};
 
 const LORA_SERVICE_ID: Uuid = uuid!("04ba00a8-8f96-404c-b2fc-c2adf2ce6700");
+const LORA_SERVICE_FILTER: ScanFilter = ScanFilter::Service(LORA_SERVICE_ID);
+
 const LORA_UUID_SEND: Uuid = uuid!("065877c5-023e-41b2-acd8-fcafaf67b846");
 const LORA_UUID_RECV: Uuid = uuid!("29ac4891-00b9-42e7-9e3f-041405c743b6");
-
-const LORA_SERVICE_FILTER: ScanFilter = ScanFilter::Service(LORA_SERVICE_ID);
+const LORA_UUID_SEND_AUDIO: Uuid = uuid!("17112441-1236-4199-8b6b-f61722bd967e");
+const LORA_UUID_RECV_AUDIO: Uuid = uuid!("828e6e8e-bd63-42d5-ae20-324e7c9cf525");
 
 struct LoraState {
   name: String,
@@ -199,6 +202,139 @@ async fn lora_listen_to_connection_updates(app_handle: tauri::AppHandle) -> Resu
   return Ok(());
 }
 
+struct Codec2 {
+  ptr: *mut CODEC2,
+}
+
+impl Codec2 {
+  fn create(mode: u32) -> Codec2 {
+    unsafe {
+      return Codec2 {
+        ptr: codec2_create(mode.try_into().unwrap()),
+      };
+    }
+  }
+
+  fn samples_per_frame(&self) -> i32 {
+    unsafe {
+      return codec2_samples_per_frame(self.ptr);
+    }
+  }
+
+  fn make_samples_frame(&self) -> Vec<i16> {
+    return vec!(0; self.samples_per_frame().try_into().unwrap());
+  }
+
+  fn bytes_per_frame(&self) -> i32 {
+    unsafe {
+      return codec2_bytes_per_frame(self.ptr);
+    }
+  }
+
+  fn make_bytes_frame(&self) -> Vec<u8> {
+    return vec!(0; self.bytes_per_frame().try_into().unwrap());
+  }
+
+  fn encode(&self, bytes: &mut [u8], speech_in: &[i16]) {
+    unsafe {
+      codec2_encode(self.ptr, bytes.as_mut_ptr(), speech_in.as_ptr().cast_mut());
+    }
+  }
+
+  fn decode(&self, speech_out: &mut [i16], bytes: &[u8]) {
+    unsafe {
+      codec2_decode(self.ptr, speech_out.as_mut_ptr(), bytes.as_ptr().cast_mut());
+    }
+  }
+}
+
+impl Drop for Codec2 {
+  fn drop(&mut self) {
+    unsafe {
+      codec2_destroy(self.ptr);
+    }
+  }
+}
+
+unsafe impl Send for Codec2 {}
+unsafe impl Sync for Codec2 {}
+
+#[tauri::command]
+async fn mic_record() -> Result<(), String> {
+  let (tx, mut rx) = mpsc::unbounded_channel::<Vec<u8>>();
+
+  let codec2 = Codec2::create(CODEC2_MODE_1200);
+  let mut samples = codec2.make_samples_frame();
+  let mut samples_len: usize = 0;
+  let mut encoded = codec2.make_bytes_frame();
+
+  let host = cpal::default_host();
+  let input_device = host.default_input_device().unwrap();
+  let input_config = input_device.default_input_config().unwrap();
+  let input_stream = input_device.build_input_stream_raw(
+    &input_config.into(),
+    cpal::SampleFormat::I16,
+    move |data, _| {
+      let data_samples = data.as_slice::<i16>().unwrap();
+
+      let mut idx: usize = 0;
+      while idx < data.len() {
+        let slice_len = samples.len() - samples_len;
+        let end = std::cmp::min(idx + slice_len, data.len());
+        let data_slice = &data_samples[idx..end];
+
+        if samples_len > 0 {
+          samples[samples_len..].copy_from_slice(data_slice);
+          samples_len = 0;
+
+          codec2.encode(encoded.as_mut_slice(), samples.as_slice());
+          tx.send(encoded.clone()).unwrap();
+          idx += samples.len();
+          continue;
+        }
+
+        if data_slice.len() < samples.len() {
+          samples[..data_slice.len()].copy_from_slice(data_slice);
+          samples_len = data_samples.len() - idx;
+          break;
+        }
+
+        codec2.encode(encoded.as_mut_slice(), data_slice);
+        tx.send(encoded.clone()).unwrap();
+        idx += samples.len();
+      }
+    },
+    |err| {
+      eprintln!("an error occurred on stream: {err}");
+    },
+    None,
+  ).unwrap();
+
+  input_stream.play().unwrap();
+
+  let ble = tauri_plugin_blec::get_handler().unwrap();
+
+  println!("lora_connect sending...");
+  let send_future = ble.send_data(
+    LORA_UUID_SEND_AUDIO,
+    result.borrow().as_slice(),
+    WriteType::WithoutResponse,
+  );
+  match timeout(Duration::from_millis(5000), send_future).await {
+    Ok(r) => {
+      r.map_err(|e| e.to_string())?;
+    }
+    Err(_) => {
+      return Err("lora send timeout".to_string());
+    }
+  }
+  println!("lora_connect send:done");
+
+  input_stream.pause().unwrap();
+
+  return Ok(());
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -219,6 +355,7 @@ pub fn run() {
       lora_disconnect,
       lora_is_disconnecting,
       lora_send,
+      mic_record,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

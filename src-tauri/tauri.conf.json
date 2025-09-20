@@ -21,7 +21,10 @@
       "pattern": {
         "use": "brownfield"
       },
-      "csp": null
+      "csp": "default-src 'self' blob: data: media:; script-src 'self' 'unsafe-eval';",
+      "headers": {
+        "Permissions-Policy": "microphone(self)"
+      }
     },
     "windows": [
       {
